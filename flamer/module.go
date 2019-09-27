@@ -1,7 +1,7 @@
-package flamegraph
+package flamer
 
 import (
-	"flamer/flamegraph/interfaces"
+	"flamer/flamer/interfaces"
 	"flamingo.me/dingo"
 	"flamingo.me/flamingo/v3/framework/web"
 )
@@ -11,7 +11,9 @@ type Module struct {
 }
 
 // Configure configures the attribute value renderer module
-func (m *Module) Configure(injector *dingo.Injector) {}
+func (m *Module) Configure(injector *dingo.Injector) {
+	web.BindRoutes(injector, new(routes))
+}
 
 type routes struct {
 	flamerController *interfaces.FlamerController
