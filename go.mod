@@ -1,4 +1,4 @@
-module flamer
+module github.com/i-love-flamingo/flamer
 
 go 1.12
 
