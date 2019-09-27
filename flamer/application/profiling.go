@@ -3,8 +3,10 @@ package application
 import (
 	"context"
 	"flamingo.me/flamingo/v3/framework/flamingo"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	runtimePprof "runtime/pprof"
 	"time"
 )
@@ -17,7 +19,7 @@ type (
 
 	// CPUProfile Data
 	CPUProfile struct {
-		Duration time.Duration // 5 seconds by default
+		Duration time.Duration // 30 seconds by default
 	}
 )
 
@@ -41,13 +43,17 @@ func (p *Profiler) CPUProfile(ctx context.Context) ([]byte, error) {
 func (p *Profiler) cpuCapture() ([]byte, error) {
 	cpuProfile := new(CPUProfile)
 
+	runtime.SetCPUProfileRate(500)
+
 	dur := cpuProfile.Duration
 	if dur == 0 {
-		dur = 5 * time.Second
+		dur = 30 * time.Second
 	}
 
 	f := p.newTmpFile()
-	if err := runtimePprof.StartCPUProfile(f); err != nil {
+
+	err := runtimePprof.StartCPUProfile(f)
+	if err != nil {
 		return nil, nil
 	}
 
@@ -55,13 +61,17 @@ func (p *Profiler) cpuCapture() ([]byte, error) {
 
 	runtimePprof.StopCPUProfile()
 
-	if err := f.Close(); err != nil {
+	err = f.Close()
+	if err != nil {
 		return nil, nil
 	}
+
 	return p.getFileContent(f)
 }
 
 func (p *Profiler) getFileContent(f *os.File) ([]byte, error) {
+	p.logger.Debugf(fmt.Sprintf("profile filename: %s", f.Name()))
+
 	data, err := ioutil.ReadFile(f.Name())
 	if err != nil {
 		return nil, err

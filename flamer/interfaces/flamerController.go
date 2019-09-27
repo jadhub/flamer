@@ -5,6 +5,7 @@ import (
 	"flamingo.me/flamingo/v3/framework/flamingo"
 	"flamingo.me/flamingo/v3/framework/web"
 	"github.com/i-love-flamingo/flamer/flamer/application"
+	//"github.com/pkg/profile"
 	"net/http"
 )
 
@@ -37,6 +38,13 @@ func (fc *FlamerController) Inject(
 
 // GetFlameGraphAction returns a flame graph
 func (fc *FlamerController) GetFlameGraphAction(ctx context.Context, r *web.Request) web.Result {
+	//defer profile.Start(profile.CPUProfile, profile.ProfilePath("/tmp"), profile.NoShutdownHook).Stop()
+
+	x := make([]string, 0)
+	for i := 0; i < 1000000; i++ {
+		x = append(x, "my string")
+	}
+
 	result, err := fc.profiler.CPUProfile(ctx)
 	if err != nil {
 		return fc.responder.Data(Result{
@@ -45,5 +53,6 @@ func (fc *FlamerController) GetFlameGraphAction(ctx context.Context, r *web.Requ
 		}).Status(http.StatusInternalServerError)
 	}
 
-	return fc.responder.Data(result).Status(http.StatusOK)
+	return fc.responder.Data(string(result)).Status(http.StatusOK)
+	//return fc.responder.Data(nil).Status(http.StatusOK)
 }
